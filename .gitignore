@@ -1,6 +1,23 @@
-venv/
-node_modules/
-__pycache__/
-*.pyc
-snapboard.db
+# Python
+backend/venv/
+backend/__pycache__/
+backend/*.db
+backend/app/uploads/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
 .env
+.env.local
+
+# Logs
+*.log

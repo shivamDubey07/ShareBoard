@@ -1,0 +1,198 @@
+html,
+body,
+#root {
+    width:100%;
+    height:100%;
+    margin:0;
+}
+
+
+* {
+    box-sizing:border-box;
+}
+
+
+body {
+    background:#111827;
+    color:#e5e7eb;
+
+    font-family:
+        Inter,
+        Arial,
+        sans-serif;
+}
+
+
+/* Main Editor */
+
+.ProseMirror {
+
+    width:100%;
+    min-height:100vh;
+
+    padding:30px 100px;
+
+    outline:none;
+
+    background:#111827;
+
+    color:#e5e7eb;
+
+    font-size:16px;
+
+    line-height:1.8;
+
+    counter-reset:block;
+
+}
+
+
+
+/* Paragraph blocks */
+
+.ProseMirror p {
+
+    position:relative;
+
+    margin:8px 0;
+
+}
+
+
+
+/* Line / block numbers */
+
+.ProseMirror p::before {
+
+    counter-increment:block;
+
+    content:counter(block);
+
+    position:absolute;
+
+    left:-70px;
+
+    width:40px;
+
+    text-align:right;
+
+    color:#6b7280;
+
+    font-size:13px;
+
+    user-select:none;
+
+}
+
+
+
+/* Empty first line */
+
+.ProseMirror p.is-editor-empty:first-child::before {
+
+    content:"";
+
+}
+
+
+
+/* Headings */
+
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3 {
+
+    color:#ffffff;
+
+}
+
+
+
+/* Links */
+
+.ProseMirror a {
+
+    color:#60a5fa;
+
+}
+
+
+
+/* Images */
+
+.ProseMirror img {
+
+    display:block;
+
+    max-width:80%;
+
+    height:auto;
+
+    margin:20px 0;
+
+    border-radius:10px;
+
+    border:1px solid #374151;
+
+    cursor:pointer;
+
+}
+
+
+
+/* Selected image */
+
+.ProseMirror img.ProseMirror-selectednode {
+
+    outline:
+
+    3px solid #3b82f6;
+
+}
+
+
+
+/* Image resize slider */
+
+.tiptap-image-resize {
+
+    margin-top:8px;
+
+}
+
+
+
+/* Scrollbar */
+
+::-webkit-scrollbar {
+
+    width:8px;
+
+}
+
+
+::-webkit-scrollbar-track {
+
+    background:#111827;
+
+}
+
+
+::-webkit-scrollbar-thumb {
+
+    background:#374151;
+
+    border-radius:10px;
+
+}
+
+
+/* Selection */
+
+::selection {
+
+    background:#2563eb;
+
+    color:white;
+
+}
