@@ -108,20 +108,33 @@ def save_board(
 def lock(
     slug: str,
     body: LockBoardRequest,
+    owner_token: str | None = Header(
+        default=None,
+        alias="X-Owner-Token"
+    ),
     db: Session = Depends(get_db)
 ):
 
-    board = lock_board(
-        db,
-        slug,
-        body.password
-    )
+    board = get_board(db, slug)
 
     if board is None:
         raise HTTPException(
             status_code=404,
             detail="Board not found"
         )
+
+    # Only owner can lock
+    if owner_token != board.owner_token:
+        raise HTTPException(
+            status_code=403,
+            detail="Only the owner can lock this board"
+        )
+
+    lock_board(
+        db,
+        slug,
+        body.password
+    )
 
     return {
         "message": "Board locked"
@@ -169,19 +182,31 @@ def verify(
 @router.delete("/{slug}/lock")
 def unlock(
     slug: str,
+    owner_token: str | None = Header(
+        default=None,
+        alias="X-Owner-Token"
+    ),
     db: Session = Depends(get_db)
 ):
 
-    board = unlock_board(
-        db,
-        slug
-    )
+    board = get_board(db, slug)
 
     if board is None:
         raise HTTPException(
             status_code=404,
             detail="Board not found"
         )
+
+    if owner_token != board.owner_token:
+        raise HTTPException(
+            status_code=403,
+            detail="Only the owner can unlock this board"
+        )
+
+    unlock_board(
+        db,
+        slug
+    )
 
     return {
         "message": "Board unlocked"

@@ -24,7 +24,6 @@ export default function Board() {
 
     const [password, setPassword] = useState("");
 
-    const [authorized, setAuthorized] = useState(false);
 
     const [error, setError] = useState("");
     const [canEdit, setCanEdit] = useState(true);
@@ -222,7 +221,6 @@ export default function Board() {
 
         if (res.data.success) {
 
-    setAuthorized(true);
 
     setProtectedBoard(false);
 
@@ -400,11 +398,11 @@ export default function Board() {
         >
 
             <Navbar
-                slug={slug}
-                saving={saving}
-                canEdit={canEdit}
-                isOwner={isOwner}
-                togglePermission={togglePermission}
+                    slug={slug}
+                    saving={saving}
+                    isOwner={isOwner}
+                    canEdit={canEdit}
+                    togglePermission={togglePermission}
             />
 
             <div

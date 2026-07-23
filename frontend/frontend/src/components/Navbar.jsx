@@ -118,6 +118,8 @@ export default function Navbar({
     }}
 >
 
+{
+    isOwner && (
     <button
         onClick={() => setShowPasswordModal(true)}
         style={{
@@ -138,6 +140,9 @@ export default function Navbar({
         Protect
 
     </button>
+
+        )
+}
 
     {isOwner && (
         <label

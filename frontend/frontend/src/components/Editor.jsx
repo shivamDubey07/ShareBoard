@@ -211,10 +211,9 @@ useEffect(() => {
 
 
 
-            const imageUrl =
-                "http://127.0.0.1:8000"
-                +
-                response.data.url;
+           const imageUrl =
+    import.meta.env.VITE_API_URL +
+    response.data.url;
 
 
 
