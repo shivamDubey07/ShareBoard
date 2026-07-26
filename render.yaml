@@ -11,7 +11,7 @@ services:
       - key: PYTHON_VERSION
         value: 3.13.5
       - key: DATA_DIR
-        value: /var/data
+        value: /opt/render/project/src/backend/data
       - key: SESSION_SECRET
         generateValue: true
       - key: SESSION_COOKIE_SAMESITE
@@ -22,5 +22,5 @@ services:
         value: https://shareboards.netlify.app
     disk:
       name: snapboard-data
-      mountPath: /var/data
+      mountPath: /opt/render/project/src/backend/data
       sizeGB: 1
