@@ -4,7 +4,8 @@ import api from "../services/api";
 export default function PasswordModal({
     slug,
     open,
-    onClose
+    onClose,
+    onBeforeLock
 }) {
 
     const [password, setPassword] = useState("");
@@ -28,6 +29,8 @@ export default function PasswordModal({
         try {
 
             setLoading(true);
+
+            await onBeforeLock();
 
             await api.post(
                 `/boards/${slug}/lock`,

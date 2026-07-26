@@ -13,7 +13,8 @@ export default function Navbar({
     saving,
     canEdit,
     isOwner,
-    togglePermission
+    togglePermission,
+    flushPendingSave
 }) {
 
     const [copied, setCopied] = useState(false);
@@ -191,6 +192,7 @@ export default function Navbar({
     slug={slug}
     open={showPasswordModal}
     onClose={() => setShowPasswordModal(false)}
+    onBeforeLock={flushPendingSave}
 />  
 
         </div>

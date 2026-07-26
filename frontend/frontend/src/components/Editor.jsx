@@ -155,7 +155,9 @@ export default function Editor({
 
         editor.commands.setContent(
             content,
-            false
+            {
+                emitUpdate: false
+            }
         );
 
     }

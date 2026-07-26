@@ -15,6 +15,7 @@ export default function Board() {
     const saveTimeout = useRef(null);
     const localChangeVersion = useRef(0);
     const hasUnsavedChanges = useRef(false);
+    const latestContent = useRef("");
 
     const [content, setContent] = useState("");
     const [loading, setLoading] = useState(true);
@@ -294,6 +295,7 @@ export default function Board() {
     function saveContent(value) {
 
         setContent(value);
+        latestContent.current = value;
         if (!slug) return;
 
         localChangeVersion.current += 1;
@@ -337,6 +339,31 @@ export default function Board() {
             }
 
         }, 150);
+
+    }
+
+    async function flushPendingSave() {
+
+        if (!slug || !hasUnsavedChanges.current) return;
+
+        if (saveTimeout.current) {
+            clearTimeout(saveTimeout.current);
+            saveTimeout.current = null;
+        }
+
+        const version = localChangeVersion.current;
+
+        await api.put(
+            `/boards/${slug}`,
+            {
+                content: latestContent.current
+            }
+        );
+
+        if (version === localChangeVersion.current) {
+            hasUnsavedChanges.current = false;
+            setSaving(false);
+        }
 
     }
 
@@ -457,6 +484,7 @@ export default function Board() {
                     isOwner={isOwner}
                     canEdit={canEdit}
                     togglePermission={togglePermission}
+                    flushPendingSave={flushPendingSave}
             />
 
             <div
