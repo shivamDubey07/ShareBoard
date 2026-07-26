@@ -63,7 +63,8 @@ def load_board(
        owner_token == board.owner_token
     )
 
-    if board.is_protected:
+    # The owner token is sufficient to access a protected board.
+    if board.is_protected and not is_owner:
 
         verified = request.session.get(
             "verified_boards",
@@ -171,8 +172,16 @@ def verify(
 
         request.session["verified_boards"] = verified
 
+        board = get_board(db, slug)
+
+        return {
+            "success": True,
+            "content": board.content,
+            "can_edit": board.can_edit
+        }
+
     return {
-        "success": success
+        "success": False
     }
 
 # -------------------------

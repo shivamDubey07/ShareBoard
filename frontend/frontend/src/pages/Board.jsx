@@ -81,9 +81,6 @@ export default function Board() {
             const res = await api.get(
                 `/boards/${slug}`
             );
-            setCanEdit(res.data.can_edit);
-            setIsOwner(res.data.is_owner);
-
             // 🔒 Board is password protected
             if (res.data.locked) {
 
@@ -95,6 +92,8 @@ export default function Board() {
 
             // ✅ Board is accessible
             setProtectedBoard(false);
+            setCanEdit(res.data.can_edit);
+            setIsOwner(res.data.is_owner);
 
             setContent(
                 res.data.content || ""
@@ -269,12 +268,8 @@ export default function Board() {
     setProtectedBoard(false);
 
     setError("");
-
-    const board = await api.get(
-        `/boards/${slug}`
-    );
-
-    setContent(board.data.content);
+    setCanEdit(res.data.can_edit);
+    setContent(res.data.content || "");
 
 }
         else {
