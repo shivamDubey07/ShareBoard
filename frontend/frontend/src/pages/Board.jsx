@@ -173,15 +173,20 @@ export default function Board() {
             ) return;
 
             requestInProgress = true;
+            const versionAtRequestStart =
+                localChangeVersion.current;
 
             try {
 
                 const res = await api.get(`/boards/${slug}`);
 
-                // The user may have typed while this request was in flight.
+                // Never apply a response that started before a local edit.
+                // It may contain server content from before that edit was saved.
                 if (
                     stopped ||
                     hasUnsavedChanges.current ||
+                    versionAtRequestStart !==
+                        localChangeVersion.current ||
                     res.data.locked
                 ) return;
 
