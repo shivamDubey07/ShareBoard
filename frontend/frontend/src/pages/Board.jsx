@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import api from "../services/api";
-import { createSocket } from "../services/websocket";
 import Editor from "../components/Editor";
 import Navbar from "../components/Navbar";
 
@@ -14,7 +13,8 @@ export default function Board() {
     const navigate = useNavigate();
 
     const saveTimeout = useRef(null);
-    const socketRef = useRef(null);
+    const localChangeVersion = useRef(0);
+    const hasUnsavedChanges = useRef(false);
 
     const [content, setContent] = useState("");
     const [loading, setLoading] = useState(true);
@@ -34,41 +34,6 @@ export default function Board() {
     // Create board automatically
     // -------------------------------
 
-    useEffect(() => {
-
-    if (!slug) return;
-
-    const socket = createSocket(slug);
-
-    socketRef.current = socket;
-
-    socket.onopen = () => {
-
-        console.log("✅ WebSocket Connected");
-
-    };
-
-    socket.onmessage = (event) => {
-
-    console.log("📩 Received");
-
-    setContent(event.data);
-
-};
-
-    socket.onclose = () => {
-
-        console.log("❌ WebSocket Closed");
-
-    };
-
-    return () => {
-
-        socket.close();
-
-    };
-
-}, [slug]);
     useEffect(() => {
 
         async function createBoard() {
@@ -191,6 +156,85 @@ export default function Board() {
 
 }, [slug]);
 
+    // Refresh content from the server without replacing local, unsaved typing.
+    useEffect(() => {
+
+        if (!slug || loading || protectedBoard) return;
+
+        let stopped = false;
+        let requestInProgress = false;
+
+        async function refreshBoard() {
+
+            if (
+                stopped ||
+                requestInProgress ||
+                hasUnsavedChanges.current
+            ) return;
+
+            requestInProgress = true;
+
+            try {
+
+                const res = await api.get(`/boards/${slug}`);
+
+                // The user may have typed while this request was in flight.
+                if (
+                    stopped ||
+                    hasUnsavedChanges.current ||
+                    res.data.locked
+                ) return;
+
+                setCanEdit(res.data.can_edit);
+                setIsOwner(res.data.is_owner);
+                setContent(current =>
+                    current === (res.data.content || "")
+                        ? current
+                        : (res.data.content || "")
+                );
+
+            }
+            catch (err) {
+
+                console.error("Board refresh failed", err);
+
+            }
+            finally {
+
+                requestInProgress = false;
+
+            }
+
+        }
+
+        const interval = window.setInterval(refreshBoard, 750);
+
+        function refreshWhenVisible() {
+
+            if (document.visibilityState === "visible") {
+                refreshBoard();
+            }
+
+        }
+
+        document.addEventListener(
+            "visibilitychange",
+            refreshWhenVisible
+        );
+
+        return () => {
+
+            stopped = true;
+            window.clearInterval(interval);
+            document.removeEventListener(
+                "visibilitychange",
+                refreshWhenVisible
+            );
+
+        };
+
+    }, [slug, loading, protectedBoard]);
+
 
     async function togglePermission() {
 
@@ -255,15 +299,11 @@ export default function Board() {
     function saveContent(value) {
 
         setContent(value);
-
-        if (
-    socketRef.current &&
-    socketRef.current.readyState === WebSocket.OPEN
-) {
-    socketRef.current.send(value);
-}
         if (!slug) return;
 
+        localChangeVersion.current += 1;
+        const version = localChangeVersion.current;
+        hasUnsavedChanges.current = true;
         setSaving(true);
 
         if (saveTimeout.current) {
@@ -285,18 +325,37 @@ export default function Board() {
                     }
                 );
 
+                if (version === localChangeVersion.current) {
+                    hasUnsavedChanges.current = false;
+                    setSaving(false);
+                }
+
             }
             catch (err) {
 
                 console.error(err);
 
+                if (version === localChangeVersion.current) {
+                    setSaving(false);
+                }
+
             }
 
-            setSaving(false);
-
-        }, 500);
+        }, 150);
 
     }
+
+    useEffect(() => {
+
+        return () => {
+
+            if (saveTimeout.current) {
+                clearTimeout(saveTimeout.current);
+            }
+
+        };
+
+    }, []);
 
 
 
