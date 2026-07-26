@@ -3,6 +3,7 @@ from fastapi.staticfiles import StaticFiles
 import shutil
 import uuid
 import os
+from pathlib import Path
 
 
 router = APIRouter(
@@ -11,12 +12,12 @@ router = APIRouter(
 )
 
 
-UPLOAD_DIR = "app/uploads"
-
-os.makedirs(
-    UPLOAD_DIR,
-    exist_ok=True
+DATA_DIR = Path(
+    os.getenv("DATA_DIR", Path(__file__).resolve().parent.parent.parent)
 )
+UPLOAD_DIR = DATA_DIR / "uploads"
+
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
 @router.post("/")
@@ -30,10 +31,7 @@ async def upload_image(
         + file.filename.split(".")[-1]
     )
 
-    filepath = os.path.join(
-        UPLOAD_DIR,
-        filename
-    )
+    filepath = UPLOAD_DIR / filename
 
     with open(filepath, "wb") as buffer:
         shutil.copyfileobj(

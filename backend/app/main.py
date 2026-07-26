@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -24,15 +27,24 @@ app = FastAPI(
 
 app.add_middleware(
     SessionMiddleware,
-    secret_key="CHANGE_THIS_TO_A_LONG_RANDOM_SECRET"
+    secret_key=os.getenv("SESSION_SECRET", "local-development-secret"),
+    same_site=os.getenv("SESSION_COOKIE_SAMESITE", "lax"),
+    https_only=os.getenv("SESSION_COOKIE_SECURE", "false").lower() == "true",
 )
 
 # -------------------------
 # CORS
 # -------------------------
 
+allowed_origins = [
+    origin.strip()
+    for origin in os.getenv("CORS_ORIGINS", "").split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=allowed_origins,
     allow_origin_regex=r"https://.*\.netlify\.app",
     allow_credentials=True,
     allow_methods=["*"],
@@ -55,6 +67,11 @@ def root():
         "status": "ok",
         "message": "SnapBoard API is running"
     }
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
 
 # -------------------------
@@ -93,8 +110,14 @@ async def websocket_endpoint(
 # Uploaded Images
 # -------------------------
 
+data_dir = Path(
+    os.getenv("DATA_DIR", Path(__file__).resolve().parent.parent)
+)
+upload_dir = data_dir / "uploads"
+upload_dir.mkdir(parents=True, exist_ok=True)
+
 app.mount(
     "/uploads",
-    StaticFiles(directory="app/uploads"),
+    StaticFiles(directory=upload_dir),
     name="uploads"
 )
