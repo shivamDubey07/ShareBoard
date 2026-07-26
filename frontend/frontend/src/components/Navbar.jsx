@@ -11,10 +11,13 @@ import PasswordModal from "./PasswordModal";
 export default function Navbar({
     slug,
     saving,
+    saveError,
     canEdit,
     isOwner,
+    isProtected,
     togglePermission,
-    flushPendingSave
+    flushPendingSave,
+    onLocked
 }) {
 
     const [copied, setCopied] = useState(false);
@@ -97,11 +100,19 @@ export default function Navbar({
 
                 <span
                     style={{
-                        color: "#9ca3af",
+                        color: saveError
+                            ? "#f87171"
+                            : "#9ca3af",
                         fontSize: "14px"
                     }}
                 >
-                    {saving ? "Saving..." : "✓ Saved"}
+                    {
+                        saveError
+                            ? "Save failed"
+                            : saving
+                                ? "Saving..."
+                                : "✓ Saved"
+                    }
                 </span>
 
 
@@ -138,7 +149,7 @@ export default function Navbar({
 
         <Lock size={16} />
 
-        Protect
+        {isProtected ? "Change Password" : "Protect"}
 
     </button>
 
@@ -193,6 +204,7 @@ export default function Navbar({
     open={showPasswordModal}
     onClose={() => setShowPasswordModal(false)}
     onBeforeLock={flushPendingSave}
+    onLocked={onLocked}
 />  
 
         </div>

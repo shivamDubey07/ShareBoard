@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -26,6 +26,30 @@ SessionLocal = sessionmaker(
 )
 
 Base = declarative_base()
+
+
+def migrate_database():
+    """Apply small, backwards-compatible migrations for existing SQLite data."""
+
+    inspector = inspect(engine)
+
+    if "boards" not in inspector.get_table_names():
+        return
+
+    columns = {
+        column["name"]
+        for column in inspector.get_columns("boards")
+    }
+
+    if "content_version" not in columns:
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    "ALTER TABLE boards "
+                    "ADD COLUMN content_version INTEGER "
+                    "NOT NULL DEFAULT 0"
+                )
+            )
 
 
 def get_db():

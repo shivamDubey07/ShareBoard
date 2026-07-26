@@ -24,6 +24,12 @@ class Board(Base):
         default=""
     )
 
+    content_version = Column(
+        Integer,
+        default=0,
+        nullable=False
+    )
+
     # Password protection
     is_protected = Column(
         Boolean,
@@ -38,7 +44,8 @@ class Board(Base):
 
     can_edit = Column(
         Boolean,
-        default=True
+        default=True,
+        nullable=False
     )
     owner_token = Column(
         String,

@@ -5,7 +5,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.database import Base, engine
+from app.database import Base, engine, migrate_database
 import app.models
 
 from app.routers.boards import router as board_router
@@ -18,6 +18,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
+migrate_database()
 
 
 app = FastAPI(

@@ -5,7 +5,8 @@ export default function PasswordModal({
     slug,
     open,
     onClose,
-    onBeforeLock
+    onBeforeLock,
+    onLocked
 }) {
 
     const [password, setPassword] = useState("");
@@ -30,15 +31,22 @@ export default function PasswordModal({
 
             setLoading(true);
 
-            await onBeforeLock();
+            const saved = await onBeforeLock();
 
-            await api.post(
+            if (!saved) {
+                throw new Error("Board content could not be saved");
+            }
+
+            const response = await api.post(
                 `/boards/${slug}/lock`,
                 {
                     password
                 }
             );
 
+            onLocked(response.data.access_token);
+            setPassword("");
+            setConfirm("");
             alert("Board protected successfully 🔒");
 
             onClose();
@@ -118,12 +126,16 @@ export default function PasswordModal({
                     }}
                 >
 
-                    <button onClick={onClose}>
+                    <button
+                        onClick={onClose}
+                        disabled={loading}
+                    >
                         Cancel
                     </button>
 
                     <button
                         onClick={lockBoard}
+                        disabled={loading}
                     >
                         {
                             loading

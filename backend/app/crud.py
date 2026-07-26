@@ -17,7 +17,7 @@ def create_board(db: Session, slug: str = None):
         )
 
         if existing:
-            return existing
+            return None
 
     else:
 
@@ -58,20 +58,31 @@ def get_board(db: Session, slug: str):
 def update_board(
     db: Session,
     slug: str,
-    content: str
+    content: str,
+    version: int
 ):
+    updated = (
+        db.query(Board)
+        .filter(
+            Board.slug == slug,
+            Board.content_version == version
+        )
+        .update(
+            {
+                Board.content: content,
+                Board.content_version:
+                    Board.content_version + 1
+            },
+            synchronize_session=False
+        )
+    )
 
-    board = get_board(db, slug)
-
-    if board is None:
+    if updated == 0:
+        db.rollback()
         return None
 
-    board.content = content
-
     db.commit()
-    db.refresh(board)
-
-    return board
+    return get_board(db, slug)
 
 
 def lock_board(

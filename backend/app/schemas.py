@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 # ----------------------------
@@ -30,6 +30,7 @@ class BoardResponse(BaseModel):
     is_protected: bool
     can_edit: bool
     is_owner: bool
+    version: int
 
     class Config:
         from_attributes = True
@@ -41,6 +42,7 @@ class BoardResponse(BaseModel):
 
 class BoardUpdate(BaseModel):
     content: str
+    version: int = Field(ge=0)
 
 
 # ----------------------------
@@ -55,13 +57,12 @@ class PermissionUpdate(BaseModel):
 # ----------------------------
 
 class LockBoardRequest(BaseModel):
-    password: str
+    password: str = Field(min_length=4, max_length=72)
 
 
 class VerifyPasswordRequest(BaseModel):
-    password: str
+    password: str = Field(min_length=1, max_length=72)
 
 
 class VerifyPasswordResponse(BaseModel):
     success: bool
-

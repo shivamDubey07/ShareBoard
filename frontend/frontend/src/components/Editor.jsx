@@ -10,6 +10,7 @@ import ImageToolbar from "./ImageToolbar";
 export default function Editor({
     content,
     onChange,
+    onBlur,
     editable
 }) {
 
@@ -140,6 +141,12 @@ export default function Editor({
                 editor.getHTML()
             );
 
+
+        },
+
+        onBlur(){
+
+            onBlur();
 
         }
 
